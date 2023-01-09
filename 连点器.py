@@ -5,7 +5,7 @@ import sys
 import threading
 import keyboard
 from tkinter import ttk,messagebox
-messagebox.showwarning("使用提示","一旦本软件出现任何问题导致点击无法停止时,请将鼠标移至\n屏幕左上角\n程序将会触发错误并强行结束点击")
+import time
 lock = threading.Lock()
 def resource_path(relative_path):
     if getattr(sys, 'frozen', False):
@@ -82,11 +82,12 @@ keyType.config(state="readonly")
 keyType.current(0)
 keyType.grid(row=0,column=2,sticky="W")
 
-keyboard.hook(lambda x: keyLoad(x))
+keyboard.hook(keyLoad)
 
 def clickControl():
     global onClick,isNewDown
     while True:
+        time.sleep(0.2)
         mainScreen.update()
         if set(keyList.values())==startKeyList and not mainScreenInFocus:
             if keyType.get()=="按下":
@@ -120,8 +121,8 @@ def clickControl():
                     pyautogui.rightClick()
             except:
                 lock.acquire()
-                messagebox.showerror("紧急中断","点击事件触发了错误，我们紧急中断了所有事件,你可以安全的操作鼠标并重启程序")
-                os._exit()
+                messagebox.showerror("紧急中断","点击事件触发了错误,我们紧急中断了所有事件\n程序即将关闭")
+                os._exit(0)
 
 class ClickControlT(threading.Thread):
     def __init__(self):
@@ -200,7 +201,6 @@ class AboutShowerT(threading.Thread):
         threadingNumber+=1
     def run(self):
         aboutShower()
-
 def aboutBooter():
     aboutShowerT=AboutShowerT()
     aboutShowerT.daemon=True
@@ -212,6 +212,7 @@ onClickShower.grid(row=2,column=0,sticky="W")
 buttonBox=tkinter.Frame()
 buttonBox.grid(row=3,column=0,sticky="E")
 ttk.Button(buttonBox,text="关于",command=aboutBooter).grid(row=0,column=0,sticky="E")
+messagebox.showwarning("使用提示","一旦本软件出现任何问题导致点击无法停止时,请将鼠标移至\n屏幕左上角\n程序将会触发错误并强行退出")
 clickControlT=ClickControlT()
 clickControlT.daemon=True
 clickControlT.start()
